@@ -37,13 +37,13 @@ def print_solution(distance_matrix,data, manager, routing, solution):
         vehicle_route[vehicle_id] = route
         vehicle_back_distance[vehicle_id] = route_distance
         trip_distance = route_distance - distance_matrix[route[-1]][0]
-        vehicle_deliver_distance[vehicle_id] = trip_distance
+        # vehicle_deliver_distance[vehicle_id] = trip_distance
         max_route_distance = max(route_distance, max_route_distance)
     # print('Maximum of the route distances: {}m'.format(max_route_distance))
     # print(vehicle_route)
     # print(vehicle_distance)
 
-    return [vehicle_route,vehicle_back_distance,vehicle_deliver_distance]
+    return [vehicle_route,vehicle_back_distance]
 
 
 
@@ -117,7 +117,7 @@ def print_solution_tw(distance_matrix,data, manager, routing, solution):
     total_time = 0
     vehicle_route = {}
     vehicle_back_distance = {}
-    vehicle_deliver_distance = {}
+    # vehicle_deliver_distance = {}
     for vehicle_id in range(data['num_vehicles']):
         index = routing.Start(vehicle_id)
         plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
@@ -139,14 +139,14 @@ def print_solution_tw(distance_matrix,data, manager, routing, solution):
         vehicle_route[vehicle_id] = route
         vehicle_back_distance[vehicle_id] = route_distance
         trip_distance = route_distance - distance_matrix[route[-1]][0]
-        vehicle_deliver_distance[vehicle_id] = trip_distance
+        # vehicle_deliver_distance[vehicle_id] = trip_distance
         time_var = time_dimension.CumulVar(index)
         total_time += [solution.Min(time_var)]
 #         print(solution.Min(time_var))
-    return (vehicle_route,vehicle_back_distance,vehicle_deliver_distance)
+    return vehicle_route
 
 
-def VRPTW(distance_matrix,time_window_matrix,vehicle,total_rider):
+def VRPTW(distance_matrix,time_window_matrix,vehicle):
     """Solve the VRP with time windows."""
     # Instantiate the data problem.
     data = create_data_model_tw(distance_matrix,time_window_matrix,vehicle)
@@ -210,13 +210,12 @@ def VRPTW(distance_matrix,time_window_matrix,vehicle,total_rider):
 
     # Print solution on console.
     if solution:
-        vehicle_route,vehicle_back_distance,vehicle_deliver_distance = print_solution_tw(distance_matrix, data, manager, routing, solution)
+        vehicle_route = print_solution_tw(distance_matrix, data, manager, routing, solution)
         # print(type(output))
-        return (vehicle_route,vehicle_back_distance,vehicle_deliver_distance,vehicle)
+        return (vehicle_route,vehicle)
     else:
-        # print('no solution')
-        vehicle += 1
-        # print('vehicle +1')
-        if vehicle <= total_rider:
-            return VRPTW(distance_matrix,time_window_matrix,vehicle,total_rider)
 
+        vehicle += 1
+        return VRPTW(distance_matrix,time_window_matrix,vehicle)
+
+            
