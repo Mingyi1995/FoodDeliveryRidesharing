@@ -21,6 +21,7 @@ def tripAssign(month,day,hour,minute,timeParameter,store_df, storeLatLon, riderS
 
         vehicle_route,vehicle = \
         GoogleVRP.VRPTW(distance_matrix,time_window_matrix,1)
+        # print(vehicle_route)
         if total_rider >= vehicle:
             selectRider = random.sample([key for key in riderStatus.keys() 
                                      if riderStatus[key] == 0], vehicle)
@@ -53,12 +54,18 @@ def tripAssign(month,day,hour,minute,timeParameter,store_df, storeLatLon, riderS
         node_deliver_time_dict = dict(zip(node_deliver_sequnce,node_deliver_time))
         node_deliver_time_dict = {k : node_deliver_time_dict[k] for k in sorted(node_deliver_time_dict)}
         node_deliver_time = node_deliver_time_dict.values()
-
+        # print(node_deliver_time_dict)
+        
         #rider back time = departure time + max arrival time + the last point back to store time
         for ind,rider in enumerate(selectRider):
+            # print(ind,rider,len(selectRider))
             if rider in riderStatus:
-                back_time = departure_time + pd.Timedelta(max(node_deliver_time), 'seconds')+\
-                            pd.Timedelta(distance_matrix[vehicle_route[ind][-2]][0], 'seconds')*timeParameter
+                select_route = vehicle_route[ind]
+                select_route = [node for node in select_route if node!=0]
+                print(select_route)
+                max_deliver_time = {rider_node: node_deliver_time_dict[rider_node] for rider_node in select_route}.values()
+                back_time = departure_time + pd.Timedelta(max(max_deliver_time), 'seconds')+\
+                            pd.Timedelta(distance_matrix[select_route[-1]][0], 'seconds')*timeParameter
                 riderStatus[rider] = back_time
 
         store_df['tripTime'] = node_deliver_time
